@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/stewartryan/cloudauthn/internal/cloud-providers/aws"
@@ -20,8 +21,14 @@ func MicrosoftToAws() {
 	// 1. Create a channel to receive the roles
 	awsResponseChan := make(chan aws.AWSResponse)
 
+	// 1.1 Get value of env variable CLOUDAUTHN_MICROSOFT_TENANT_ID
+	var tenantID string
+	if tenantID = os.Getenv("CLOUDAUTHN_MICROSOFT_TENANT_ID"); tenantID == "" {
+		log.Fatal("Missing CLOUDAUTHN_MICROSOFT_TENANT_ID environment variable")
+	}
+
 	// 2. Create the login URL
-	loginUrl, err := microsoft.GenerateSAMLLoginURL("https://signin.aws.amazon.com/saml", "<YOUR AZURE TENANT ID HERE>", "https://signin.aws.amazon.com/saml")
+	loginUrl, err := microsoft.GenerateSAMLLoginURL("https://signin.aws.amazon.com/saml", tenantID, "https://signin.aws.amazon.com/saml")
 	//
 	if err != nil {
 		fmt.Println("Error creating login URL:", err)
